@@ -32,6 +32,7 @@ const LoginPage: React.FC = () => {
       }
 
       toast.success("Login successful!");
+      console.log("Navigating to /todos");
       navigate("/todos", { replace: true });
     } catch (error) {
       console.error("Login failed", error);

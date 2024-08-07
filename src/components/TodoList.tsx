@@ -42,7 +42,7 @@ const TodoList: React.FC = () => {
       {todos.length === 0 ? (
         <p className="text-gray-500">No todos available</p>
       ) : (
-        <table className="min-w-full bg-white rounded-lg shadow-lg">
+        <table className="min-w-11 bg-white rounded-lg shadow-lg">
           <thead>
             <tr className="bg-sky-600 text-white">
               <th className="p-2 border w-2/5">Text</th>
@@ -71,7 +71,7 @@ const TodoList: React.FC = () => {
                 <td className="p-2 border text-center">
                   <button
                     onClick={() => handleToggleCompletion(todo.id)}
-                    className="bg-red-500 text-white rounded-md px-2 py-1 hover:bg-red-600 active:bg-red-700 mr-2"
+                    className="bg-yellow-500 text-white rounded-md px-2 py-1 hover:bg-yellow-600 active:bg-yellow-700 mr-2"
                   >
                     {todo.completed ? "Undo" : "Complete"}
                   </button>

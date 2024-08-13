@@ -1,66 +1,58 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export interface Todo {
-  id: number;
-  text: string;
-  completed: boolean;
-}
+import { Todo, TodoState } from "../../types/types";
 
-export interface TodoState {
-  todos: Todo[];
-  loading: boolean;
-  error: string | null;
-}
-
-const initialState: TodoState = {
-  todos: [],
-  loading: false,
-  error: null,
-};
+const initialState: TodoState = {};
 
 export const todoSlice = createSlice({
   name: "todo",
   initialState,
   reducers: {
-    setTodos: (state, action: PayloadAction<Todo[]>) => {
-      state.todos = action.payload;
+    setTodos: (
+      state,
+      action: PayloadAction<{ userId: number; todos: Todo[] }>
+    ) => {
+      state[action.payload.userId] = action.payload.todos;
     },
-    addTodo: (state, action: PayloadAction<{ text: string }>) => {
-      state.todos.push({
+    addTodo: (
+      state,
+      action: PayloadAction<{ userId: number; text: string }>
+    ) => {
+      const userTodos = state[action.payload.userId] || [];
+      userTodos.push({
         id: Date.now(),
         text: action.payload.text,
         completed: false,
       });
-      const userId = localStorage.getItem("userId");
-      if (userId) {
-        localStorage.setItem(`todos_${userId}`, JSON.stringify(state.todos));
-      }
+      state[action.payload.userId] = userTodos;
     },
-    deleteTodo: (state, action: PayloadAction<{ id: number }>) => {
-      state.todos = state.todos.filter((todo) => todo.id !== action.payload.id);
-      const userId = localStorage.getItem("userId");
-      if (userId) {
-        localStorage.setItem(`todos_${userId}`, JSON.stringify(state.todos));
-      }
+    deleteTodo: (
+      state,
+      action: PayloadAction<{ userId: number; id: number }>
+    ) => {
+      const userTodos = state[action.payload.userId] || [];
+      state[action.payload.userId] = userTodos.filter(
+        (todo) => todo.id !== action.payload.id
+      );
     },
-    editTodo: (state, action: PayloadAction<{ id: number; text: string }>) => {
-      const todo = state.todos.find((todo) => todo.id === action.payload.id);
+    editTodo: (
+      state,
+      action: PayloadAction<{ userId: number; id: number; text: string }>
+    ) => {
+      const userTodos = state[action.payload.userId] || [];
+      const todo = userTodos.find((todo) => todo.id === action.payload.id);
       if (todo) {
         todo.text = action.payload.text;
       }
-      const userId = localStorage.getItem("userId");
-      if (userId) {
-        localStorage.setItem(`todos_${userId}`, JSON.stringify(state.todos));
-      }
     },
-    toggleTodoCompletion: (state, action: PayloadAction<{ id: number }>) => {
-      const todo = state.todos.find((todo) => todo.id === action.payload.id);
+    toggleTodoCompletion: (
+      state,
+      action: PayloadAction<{ userId: number; id: number }>
+    ) => {
+      const userTodos = state[action.payload.userId] || [];
+      const todo = userTodos.find((todo) => todo.id === action.payload.id);
       if (todo) {
         todo.completed = !todo.completed;
-      }
-      const userId = localStorage.getItem("userId");
-      if (userId) {
-        localStorage.setItem(`todos_${userId}`, JSON.stringify(state.todos));
       }
     },
   },
@@ -68,4 +60,5 @@ export const todoSlice = createSlice({
 
 export const { setTodos, addTodo, deleteTodo, editTodo, toggleTodoCompletion } =
   todoSlice.actions;
+
 export default todoSlice.reducer;

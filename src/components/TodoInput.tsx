@@ -3,16 +3,17 @@ import { useAppDispatch } from "../store";
 import { addTodo } from "../features/todos/TodoSlice";
 import toast from "react-hot-toast";
 
-const TodoInput: React.FC = () => {
-  const [text, setText] = useState<string>("");
+interface TodoInputProps {
+  userId: number | undefined;
+}
 
+const TodoInput: React.FC<TodoInputProps> = ({ userId }) => {
+  const [text, setText] = useState<string>("");
   const dispatch = useAppDispatch();
 
   const handleAddTodo = () => {
-    // checks if the input text is not empty after trimming whitespace
-    if (text.trim().length > 0) {
-      // dispatch the 'addTodo' action with the text as the payload
-      dispatch(addTodo({ text }));
+    if (text.trim().length > 0 && userId !== undefined) {
+      dispatch(addTodo({ userId, text }));
       toast.success("Todo added successfully!");
       setText("");
     } else {
@@ -26,7 +27,8 @@ const TodoInput: React.FC = () => {
         <input
           id="todo-input"
           type="text"
-          className="border rounded-md p-2 mx-2 w-64"
+          placeholder="Add todos..."
+          className="border rounded-md p-2 mx-2 w-64 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
           value={text}
           onChange={(e) => setText(e.target.value)}
         />

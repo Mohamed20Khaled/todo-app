@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useAppSelector, useAppDispatch } from "../store";
+import { useAppDispatch } from "../store";
 import {
   deleteTodo,
   editTodo,
@@ -7,60 +7,82 @@ import {
 } from "../features/todos/TodoSlice";
 import toast from "react-hot-toast";
 
-const TodoList: React.FC = () => {
-  const todos = useAppSelector((state) => state.todo.todos);
-  const dispatch = useAppDispatch();
+export interface Todo {
+  id: number;
+  text: string;
+  completed: boolean;
+}
 
+interface TodoListProps {
+  todos: Todo[];
+  userId: number | undefined;
+}
+
+const TodoList: React.FC<TodoListProps> = ({ todos, userId }) => {
+  const dispatch = useAppDispatch();
   const [editId, setEditId] = useState<number | null>(null);
   const [editText, setEditText] = useState<string>("");
 
-  const handleDelete = (id: number) => {
-    dispatch(deleteTodo({ id }));
-    toast.success("Todo deleted successfully!");
+  const handleDeleteTodo = (id: number) => {
+    if (userId !== undefined) {
+      dispatch(deleteTodo({ userId, id }));
+      toast.success("Todo deleted successfully!");
+    }
   };
 
-  const handleEdit = (id: number, text: string) => {
+  const handleToggleTodoCompletion = (id: number) => {
+    if (userId !== undefined) {
+      dispatch(toggleTodoCompletion({ userId, id }));
+      toast.success("Todo status updated!");
+    }
+  };
+
+  const handleEditTodo = (id: number, text: string) => {
     setEditId(id);
     setEditText(text);
   };
 
-  const handleSave = (id: number) => {
-    dispatch(editTodo({ id, text: editText }));
-    setEditId(null);
-    setEditText("");
-    toast.success("Todo updated successfully!");
-  };
-
-  const handleToggleCompletion = (id: number) => {
-    dispatch(toggleTodoCompletion({ id }));
-    toast.success("Todo status updated!");
+  const handleSaveEdit = (id: number) => {
+    if (userId !== undefined && editText.trim().length > 0) {
+      dispatch(editTodo({ userId, id, text: editText }));
+      setEditId(null);
+      setEditText("");
+      toast.success("Todo edited successfully!");
+    } else {
+      toast.error("Todo text cannot be empty!");
+    }
   };
 
   return (
     <div className="flex flex-col items-center p-4">
-      <p className="font-bold text-lg mb-4">List of TODOS</p>
+      <p className="font-bold text-lg mb-4 dark:text-gray-200">List of TODOS</p>
       {todos.length === 0 ? (
-        <p className="text-gray-500">No todos available</p>
+        <p className="text-gray-500 dark:text-gray-400">No todos available</p>
       ) : (
-        <table className="min-w-11 bg-white rounded-lg shadow-lg">
+        <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg shadow-lg">
           <thead>
             <tr className="bg-sky-600 text-white">
-              <th className="p-2 border w-2/5">Text</th>
-              <th className="p-2 border w-1/5">Actions</th>
+              <th className="p-2 border dark:border-gray-600 w-2/5">Text</th>
+              <th className="p-2 border dark:border-gray-600 w-1/5">Actions</th>
             </tr>
           </thead>
           <tbody>
             {todos.map((todo) => (
-              <tr key={todo.id} className="even:bg-gray-50 odd:bg-white">
+              <tr
+                key={todo.id}
+                className="even:bg-gray-50 odd:bg-white dark:even:bg-gray-700 dark:odd:bg-gray-800"
+              >
                 <td
-                  className={`p-2 border ${
-                    todo.completed ? "line-through text-gray-500" : ""
+                  className={`p-2 border dark:border-gray-600 ${
+                    todo.completed
+                      ? "line-through text-gray-500 dark:text-gray-400"
+                      : ""
                   }`}
                 >
                   {editId === todo.id ? (
                     <input
                       type="text"
-                      className="border p-1 rounded w-full"
+                      className="border p-1 rounded w-full dark:bg-gray-600 dark:text-gray-200"
                       value={editText}
                       onChange={(e) => setEditText(e.target.value)}
                     />
@@ -68,9 +90,9 @@ const TodoList: React.FC = () => {
                     todo.text
                   )}
                 </td>
-                <td className="p-2 border text-center">
+                <td className="p-2 border dark:border-gray-600 text-center">
                   <button
-                    onClick={() => handleToggleCompletion(todo.id)}
+                    onClick={() => handleToggleTodoCompletion(todo.id)}
                     className="bg-yellow-500 text-white rounded-md px-2 py-1 hover:bg-yellow-600 active:bg-yellow-700 mr-2"
                   >
                     {todo.completed ? "Undo" : "Complete"}
@@ -78,14 +100,14 @@ const TodoList: React.FC = () => {
 
                   {editId === todo.id ? (
                     <button
-                      onClick={() => handleSave(todo.id)}
+                      onClick={() => handleSaveEdit(todo.id)}
                       className="bg-green-500 text-white rounded-md px-2 py-1 hover:bg-green-600 active:bg-green-700 mr-2"
                     >
                       Save
                     </button>
                   ) : (
                     <button
-                      onClick={() => handleEdit(todo.id, todo.text)}
+                      onClick={() => handleEditTodo(todo.id, todo.text)}
                       className="bg-blue-500 text-white rounded-md px-2 py-1 hover:bg-blue-600 active:bg-blue-700 mr-2"
                     >
                       Edit
@@ -93,7 +115,7 @@ const TodoList: React.FC = () => {
                   )}
 
                   <button
-                    onClick={() => handleDelete(todo.id)}
+                    onClick={() => handleDeleteTodo(todo.id)}
                     className="bg-red-500 text-white rounded-md px-2 py-1 hover:bg-red-600 active:bg-red-700"
                   >
                     Delete

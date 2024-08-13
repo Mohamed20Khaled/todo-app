@@ -6,7 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import LoginPage from "./components/LoginPage";
-import TodoMainPage from "./layout/TodoMainPage";
+import TodoMainPage from "./Pages/TodoMainPage";
 
 const App: React.FC = () => {
   const isAuthenticated = () => !!localStorage.getItem("user");

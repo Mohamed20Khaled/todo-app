@@ -1,42 +1,26 @@
-import React, { useState } from "react";
-import axios from "axios";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
+import { useAppDispatch, useAppSelector } from "../store";
+import { loginUser } from "../features/auth/AuthSlice";
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    try {
-      const response = await axios.post(
-        "https://dummyjson.com/auth/login",
-        {
-          username,
-          password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const user = response.data;
-      localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("userId", user.id);
+  const isAuthenticated = useAppSelector((state) => !!state.auth.user);
 
-      // Initialize empty todos for the new user if not already set
-      if (!localStorage.getItem(`todos_${user.id}`)) {
-        localStorage.setItem(`todos_${user.id}`, JSON.stringify([]));
-      }
-
-      toast.success("Login successful!");
-      console.log("Navigating to /todos");
+  useEffect(() => {
+    if (isAuthenticated) {
       navigate("/todos", { replace: true });
-    } catch (error) {
-      console.error("Login failed", error);
-      toast.error("Login failed. Please check your credentials.");
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleLogin = async () => {
+    const resultAction = await dispatch(loginUser({ username, password }));
+    if (loginUser.fulfilled.match(resultAction)) {
+      navigate("/todos", { replace: true });
     }
   };
 

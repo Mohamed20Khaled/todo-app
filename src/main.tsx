@@ -3,28 +3,20 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import { Provider } from "react-redux";
-import { store } from "./store";
-import { Toaster } from "react-hot-toast";
+import { store, persistor } from "./store";
+import { PersistGate } from "redux-persist/integration/react";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import ThemedToaster from "./components/ThemedToaster";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <Provider store={store}>
-      <App />
-      <Toaster
-        position="top-right"
-        reverseOrder={false}
-        gutter={8}
-        containerClassName=""
-        containerStyle={{}}
-        toastOptions={{
-          className: "",
-          duration: 5000,
-          style: {
-            background: "#363636",
-            color: "#fff",
-          },
-        }}
-      />
+      <PersistGate loading={null} persistor={persistor}>
+        <ThemeProvider>
+          <App />
+          <ThemedToaster />
+        </ThemeProvider>
+      </PersistGate>
     </Provider>
   </React.StrictMode>
 );

@@ -5,31 +5,31 @@ import {
   Routes,
   Navigate,
 } from "react-router-dom";
-import LoginPage from "./components/LoginPage";
+import LoginPage from "./Pages/LoginPage";
 import TodoMainPage from "./Pages/TodoMainPage";
+import PrivateRoute from "./utils/PrivateRoute";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 const App: React.FC = () => {
-  const isAuthenticated = () => !!localStorage.getItem("user");
-
   return (
-    <Router>
-      <div>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route
-            path="/todos"
-            element={
-              isAuthenticated() ? (
-                <TodoMainPage />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
-        </Routes>
-      </div>
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <div>
+          <Routes>
+            <Route path="/" element={<Navigate to="/login" />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route
+              path="/todos"
+              element={
+                <PrivateRoute>
+                  <TodoMainPage />
+                </PrivateRoute>
+              }
+            />
+          </Routes>
+        </div>
+      </Router>
+    </ThemeProvider>
   );
 };
 
